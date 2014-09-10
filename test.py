@@ -13,41 +13,21 @@ class RandomCSVFile(unittest.TestCase):
 
     def setUp(self):
         # setup required data for test case
-        self.start_year = random.randint(1990, 2000)  # Random Start Year
-        self.end_year = random.randint(2001, 2013)  # Random End Year
-        self.years = range(self.start_year, self.end_year)
-        self.months = ['Jan', 'Feb', 'Mar', 'April', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-        self.share_values = range(100, 1000)
-        self.no_companies = random.randint(1, 10)  # Random Company Number
-        self.no_entries = (self.end_year - self.start_year) * 12
-        self.csv_header = ['Year', 'Month']
-        self.test_dict = {}
         self.csv_test_file = 'test.csv'
 
-        #generate hearder for test csv file
-        for i in range(self.no_companies):
-            comp_name = "Company-{0}".format(i + 1)
-            self.csv_header.append(comp_name)
-            self.test_dict[comp_name] = {'price': 0, 'year': '', 'month': ''}
+        #Companies in test.csv
+        self.companies = ['Company-1', 'Company-2', 'Company-3', 'Company-4', 'Company-5', 'Company-6', 'Company-7']
 
-        # Generate csv file along with the data with max price for comparison
-        with open(self.csv_test_file, 'wb') as csv_file:
-            writer = csv.writer(csv_file)
-            writer.writerow(self.csv_header)
-
-            for year in self.years:
-                for month in self.months:
-                    csv_data = [year, month]
-
-                    for cmpny in range(self.no_companies):
-                        random_share_value = random.choice(self.share_values)
-                        csv_data.append(random_share_value)
-                        company_index = "Company-{0}".format(cmpny + 1)
-
-                        if self.test_dict[company_index]['price'] < random_share_value:
-                            self.test_dict[company_index] = {'price': random_share_value, 'year': year, 'month': month}
-
-                    writer.writerow(csv_data)
+        #MAx values from test.csv
+        self.correct_data = {
+            'Company-1': {'price': 964, 'year': '1991', 'month': 'Sep'},
+            'Company-2': {'price': 958, 'year': '1995', 'month': 'Sep'},
+            'Company-3': {'price': 990, 'year': '1993', 'month': 'Dec'},
+            'Company-4': {'price': 954, 'year': '1995', 'month': 'Mar'},
+            'Company-5': {'price': 950, 'year': '1993', 'month': 'Mar'},
+            'Company-6': {'price': 978, 'year': '1990', 'month': 'Dec'},
+            'Company-7': {'price': 926, 'year': '1993', 'month': 'Sep'}
+        }
 
 
 class TestResult(RandomCSVFile):
@@ -56,10 +36,23 @@ class TestResult(RandomCSVFile):
     def test_share_analysis(self):
         analyzed_data = analyze_share.get_max_price_analysis(self.csv_test_file)
 
-        for comp_name, comp_data in analyzed_data.iteritems():
-            self.assertEqual(int(comp_data['price']), int(self.test_dict[comp_name]['price']))
-            self.assertEqual(int(comp_data['year']), int(self.test_dict[comp_name]['year']))
-            self.assertEqual(comp_data['month'], self.test_dict[comp_name]['month'])
+        #compare price data
+        self.assertEqual(analyzed_data['Company-1']['price'], 964)
+        self.assertEqual(analyzed_data['Company-2']['price'], 958)
+        self.assertEqual(analyzed_data['Company-3']['price'], 990)
+        self.assertEqual(analyzed_data['Company-4']['price'], 954)
+        self.assertEqual(analyzed_data['Company-5']['price'], 950)
+        self.assertEqual(analyzed_data['Company-6']['price'], 978)
+        self.assertEqual(analyzed_data['Company-7']['price'], 926)
+
+        #compare overall data
+        self.assertEqual(analyzed_data['Company-1'], self.correct_data['Company-1'])
+        self.assertEqual(analyzed_data['Company-2'], self.correct_data['Company-2'])
+        self.assertEqual(analyzed_data['Company-3'], self.correct_data['Company-3'])
+        self.assertEqual(analyzed_data['Company-4'], self.correct_data['Company-4'])
+        self.assertEqual(analyzed_data['Company-5'], self.correct_data['Company-5'])
+        self.assertEqual(analyzed_data['Company-6'], self.correct_data['Company-6'])
+        self.assertEqual(analyzed_data['Company-7'], self.correct_data['Company-7'])
 
 
 if __name__ == "__main__":
