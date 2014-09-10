@@ -5,18 +5,15 @@ import sys
 import csv
 import unittest
 import random
-import analyze_share
+from analyze_share import AnalyzeShare
 
 
-class RandomCSVFile(unittest.TestCase):
-    """Class to generate random csv file for test case"""
+class TestShareAnalysis(unittest.TestCase):
+    """Write test case to validate result"""
 
     def setUp(self):
         # setup required data for test case
         self.csv_test_file = 'test.csv'
-
-        #Companies in test.csv
-        self.companies = ['Company-1', 'Company-2', 'Company-3', 'Company-4', 'Company-5', 'Company-6', 'Company-7']
 
         #MAx values from test.csv
         self.correct_data = {
@@ -29,30 +26,49 @@ class RandomCSVFile(unittest.TestCase):
             'Company-7': {'price': 926, 'year': '1993', 'month': 'Sep'}
         }
 
+    def test_read_data(self):
+        analyzed_data = AnalyzeShare(self.csv_test_file)
+        test_data = analyzed_data.read_data()
+        self.assertEqual(
+            test_data[0],
+            ['Year', 'Month', 'Company-1', 'Company-2', 'Company-3',
+                'Company-4', 'Company-5', 'Company-6', 'Company-7']
+        )
 
-class TestResult(RandomCSVFile):
-    """Write test case to validate result"""
+    def test_validate_file(self):
+        #Validate correct file type
+        a1_obj = AnalyzeShare(self.csv_test_file)
+        self.assertEqual(a1_obj.validate_file(), True)
+
+        #validate wrong file, file not exist
+        a2_obj = AnalyzeShare('Random.csv')
+        self.assertEqual(a2_obj.validate_file(), False)
+
+        #validate wrong file type, txt is not supported
+        a3_obj = AnalyzeShare('test.txt')
+        self.assertEqual(a3_obj.validate_file(), False)
 
     def test_share_analysis(self):
-        analyzed_data = analyze_share.get_max_price_analysis(self.csv_test_file)
+        analyzed_data = AnalyzeShare(self.csv_test_file)
+        a_data = analyzed_data.get_max_share_price()
 
         #compare price data
-        self.assertEqual(analyzed_data['Company-1']['price'], 964)
-        self.assertEqual(analyzed_data['Company-2']['price'], 958)
-        self.assertEqual(analyzed_data['Company-3']['price'], 990)
-        self.assertEqual(analyzed_data['Company-4']['price'], 954)
-        self.assertEqual(analyzed_data['Company-5']['price'], 950)
-        self.assertEqual(analyzed_data['Company-6']['price'], 978)
-        self.assertEqual(analyzed_data['Company-7']['price'], 926)
+        self.assertEqual(a_data['Company-1']['price'], 964)
+        self.assertEqual(a_data['Company-2']['price'], 958)
+        self.assertEqual(a_data['Company-3']['price'], 990)
+        self.assertEqual(a_data['Company-4']['price'], 954)
+        self.assertEqual(a_data['Company-5']['price'], 950)
+        self.assertEqual(a_data['Company-6']['price'], 978)
+        self.assertEqual(a_data['Company-7']['price'], 926)
 
         #compare overall data
-        self.assertEqual(analyzed_data['Company-1'], self.correct_data['Company-1'])
-        self.assertEqual(analyzed_data['Company-2'], self.correct_data['Company-2'])
-        self.assertEqual(analyzed_data['Company-3'], self.correct_data['Company-3'])
-        self.assertEqual(analyzed_data['Company-4'], self.correct_data['Company-4'])
-        self.assertEqual(analyzed_data['Company-5'], self.correct_data['Company-5'])
-        self.assertEqual(analyzed_data['Company-6'], self.correct_data['Company-6'])
-        self.assertEqual(analyzed_data['Company-7'], self.correct_data['Company-7'])
+        self.assertEqual(a_data['Company-1'], self.correct_data['Company-1'])
+        self.assertEqual(a_data['Company-2'], self.correct_data['Company-2'])
+        self.assertEqual(a_data['Company-3'], self.correct_data['Company-3'])
+        self.assertEqual(a_data['Company-4'], self.correct_data['Company-4'])
+        self.assertEqual(a_data['Company-5'], self.correct_data['Company-5'])
+        self.assertEqual(a_data['Company-6'], self.correct_data['Company-6'])
+        self.assertEqual(a_data['Company-7'], self.correct_data['Company-7'])
 
 
 if __name__ == "__main__":

@@ -6,33 +6,67 @@ import csv
 from collections import OrderedDict
 
 
-def get_max_price_analysis(file_path=None):
-    """Function to analyse share data for different company
+class AnalyzeShare:
+    """Class to parse csv file and analyze
 
-    from given csv file
+    shares from differect company across time.
     """
-    if not file_path:
-        file_path = raw_input(u"Enter file path: \n")
 
-    try:
-        csv_file = open(file_path, 'rb')
-        csv_file.close()
-    except IOError, e:
-        print e
-        sys.exit(0)
+    def __init__(self, data_file=None):
+        self.data_file = data_file
 
-    ext = os.path.splitext(file_path)[1]
-    if ext != '.csv':
-        print "File format is invalid. Only csv file is supported."
-        sys.exit(0)
+    def get_data_file(self):
+        """Get data file from user"""
+        attempt = 0
+        while(attempt < 5):
+            file_path = raw_input(u"Enter file path: \n")
+            self.data_file = file_path
+            is_valid = self.validate_file()
 
-    #Open csv file in read mode
-    with open(file_path, 'rb') as share_data_file:
-        share_data = csv.reader(share_data_file)
+            if not is_valid:
+                #Increase attempt counter
+                attempt += 1
+            else:
+                break
+
+        if attempt == 5:
+            print "Oops!! All attempt exausted. It seems you don't remember correct filename."
+            sys.exit(0)
+
+    def validate_file(self):
+        #check if file is present and can be read
+        try:
+            csv_file = open(self.data_file, 'rb')
+            csv_file.close()
+        except IOError, e:
+            print e
+            self.data_file = None
+            return False
+
+        #validate file extension
+        ext = os.path.splitext(self.data_file)[1]
+        if ext != '.csv':
+            print "File format is invalid. Only csv file is supported."
+            self.data_file = None
+            return False
+
+        return True
+
+    def read_data(self):
+        if not self.validate_file():
+            self.get_data_file()
+
+        with open(self.data_file, 'r') as f:
+            parsed_data = [row for row in csv.reader(f.read().splitlines())]
+
+        return parsed_data
+
+    def get_max_share_price(self):
+        share_data = self.read_data()
         final_data_dict = OrderedDict()
 
         #Extract company names from heading
-        comapny_names = next(share_data)[2:]
+        comapny_names = share_data.pop(0)[2:]
 
         #Initialize final dict to be returned with blank data
         for name in comapny_names:
@@ -49,13 +83,14 @@ def get_max_price_analysis(file_path=None):
 
         return final_data_dict
 
+
 if __name__ == '__main__':
     file_path = None
     if len(sys.argv) > 1:
         file_path = sys.argv[1]
 
-    # Get analyzed data
-    analyzed_data = get_max_price_analysis(file_path)
+    analyze_share = AnalyzeShare(file_path)
+    analyzed_data = analyze_share.get_max_share_price()
 
     # Print result
     print "\nCompany Name\tYear\tMonth\tPrice\n"
