@@ -53,7 +53,7 @@ class AnalyzeShare:
         return True
 
     def read_data(self):
-        if not self.validate_file():
+        if not self.data_file or not self.validate_file():
             self.get_data_file()
 
         with open(self.data_file, 'r') as f:
